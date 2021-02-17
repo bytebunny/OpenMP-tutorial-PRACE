@@ -24,23 +24,30 @@ void matmul_seq(double * C, double * A, double * B, size_t n) {
 }
 
 void matmul_par(double * C, double * A, double * B, size_t n) {
-  for (size_t i = 0; i < n; ++i) {
-    for (size_t k = 0; k < n; ++k) {
-      for (size_t j = 0; j < n; ++j) {
-        C[i * n + j] += A[i * n + k] * B[k * n + j];
-      }
-    }
-  }
+
+#pragma omp parallel for
+        for (size_t i = 0; i < n; ++i) {
+            for (size_t k = 0; k < n; ++k) {
+                for (size_t j = 0; j < n; ++j) {
+                    C[i * n + j] += A[i * n + k] * B[k * n + j];
+                }
+            }
+        }
 }
 
 void init_mat(double * C, double * A, double * B, size_t n) {
-  for (size_t i = 0; i < n; ++i) {
-    for (size_t j = 0; j < n; ++j) {
-      C[i * n + j] = 0.0;
-      A[i * n + j] = 0.5;
-      B[i * n + j] = 0.25;
+
+#pragma omp parallel shared(A,B,C)
+    {
+#pragma omp for // next line MUST be a for loop
+        for (size_t i = 0; i < n; ++i) {
+            for (size_t j = 0; j < n; ++j) {
+                C[i * n + j] = 0.0;
+                A[i * n + j] = 0.5;
+                B[i * n + j] = 0.25;
+            }
+        }
     }
-  }
 }
 
 void dump_mat(double * mtx, size_t n) {
