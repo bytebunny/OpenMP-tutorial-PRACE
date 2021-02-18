@@ -97,6 +97,7 @@ bool solve_parallel(int x, int y, CSudokuBoard* sudoku, bool printAnyFoundSoluti
 // TODO: Task candidates (for each possible value?)
 	for (int i = 1; i <= sudoku->getFieldSize(); i++) {      // try all numbers
 		if (!sudoku->check(x, y, i)) {
+#pragma omp task firstprivate(i,x,y,sudoku)
 			{
 				CSudokuBoard new_sudoku(*sudoku);
 				new_sudoku.set(y, x, i);                    // if number fits, set it
@@ -114,8 +115,8 @@ bool solve_parallel(int x, int y, CSudokuBoard* sudoku, bool printAnyFoundSoluti
 			}
 		}
 	}
-
 // TODO: After creating tasks for this level we will need to synchronize
+    #pragma omp taskwait
 	sudoku->set(y, x, 0);                            // no solution found, reset field
 	return false;
 }
@@ -149,7 +150,9 @@ int main(int argc, char* argv[]) {
 		// solve the Sudoku by finding (and printing) all solutions
 		t3 = omp_get_wtime();
       // TODO: Sudoku solver needs to execute within a parallel region
+#pragma omp parallel shared( sudoku1 )
 		{
+#pragma omp single
 			solve_parallel(0, 0, sudoku1, false);
 		}		
 		t4 = omp_get_wtime();
