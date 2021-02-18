@@ -29,6 +29,7 @@ double do_some_computation(int i)
 {
 	double t = 0.0;
 	int j;
+//#pragma omp parallel for private(j) reduction(+:t)
 	for (j = 0; j < i*i; j++)
 	{
 		t += sin((double)j) * cos((double)j);
@@ -45,6 +46,7 @@ int main(int argc, char* argv[])
 
 	double t1 = omp_get_wtime();
 
+#pragma omp parallel for private(i) reduction(+:result)
 	for (i = 0; i < dimension; i++)
 	{
 		result += do_some_computation(i);
