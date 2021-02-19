@@ -63,8 +63,9 @@ void matmul_task(float * C, float * A, float * B, size_t n) {
         for (size_t ib = 0; ib < n; ib += bf)
             for (size_t kb = 0; kb < n; kb += bf)
                 for (size_t jb = 0; jb < n; jb += bf) {
-#pragma omp task depend( inout : C[ ib * n + jb : bf ] ) \
-                 depend( in : A[ ib * n + kb : bf ], B[ kb * n + jb : bf] )
+#pragma omp task firstprivate( ib, kb, jb ) \
+    depend( inout : C[ ib * n + jb : bf ] ) \
+    depend( in : A[ ib * n + kb : bf ], B[ kb * n + jb : bf] )
                     {
 #if DUMP_TASKS
                         printf("task: C[%ld,%ld] += A[%ld,%ld] o B[%ld,%ld]\n", ib, jb, ib, kb, kb, jb);
